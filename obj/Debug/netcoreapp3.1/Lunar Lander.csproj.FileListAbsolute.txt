@@ -1,0 +1,40 @@
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\435413__v-ktor__explosion12.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\lunarLander.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\space.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Lunar Lander.exe
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Lunar Lander.deps.json
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Lunar Lander.runtimeconfig.json
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Lunar Lander.runtimeconfig.dev.json
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Lunar Lander.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Lunar Lander.pdb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Microsoft.CodeAnalysis.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Microsoft.VisualBasic.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\MonoGame.Framework.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\SharpDX.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\SharpDX.Direct2D1.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\SharpDX.Direct3D11.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\SharpDX.Direct3D9.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\SharpDX.DXGI.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\SharpDX.Mathematics.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\SharpDX.MediaFoundation.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\SharpDX.XAudio2.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\SharpDX.XInput.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\runtimes\debian-x64\native\libuv.so
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\runtimes\fedora-x64\native\libuv.so
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\runtimes\opensuse-x64\native\libuv.so
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\runtimes\osx\native\libuv.dylib
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\runtimes\rhel-x64\native\libuv.so
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\runtimes\win7-arm\native\libuv.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\runtimes\win7-x64\native\libuv.dll
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\runtimes\win7-x86\native\libuv.dll
+C:\Users\Abe\source\repos\Lunar Lander\obj\Debug\netcoreapp3.1\Lunar Lander.csprojAssemblyReference.cache
+C:\Users\Abe\source\repos\Lunar Lander\obj\Debug\netcoreapp3.1\Lunar Lander.csproj.CoreCompileInputs.cache
+C:\Users\Abe\source\repos\Lunar Lander\obj\Debug\netcoreapp3.1\Lunar Lander.AssemblyInfoInputs.cache
+C:\Users\Abe\source\repos\Lunar Lander\obj\Debug\netcoreapp3.1\Lunar Lander.AssemblyInfo.cs
+C:\Users\Abe\source\repos\Lunar Lander\obj\Debug\netcoreapp3.1\Lunar Lander.csproj.CopyComplete
+C:\Users\Abe\source\repos\Lunar Lander\obj\Debug\netcoreapp3.1\Lunar Lander.dll
+C:\Users\Abe\source\repos\Lunar Lander\obj\Debug\netcoreapp3.1\Lunar Lander.pdb
+C:\Users\Abe\source\repos\Lunar Lander\obj\Debug\netcoreapp3.1\Lunar Lander.genruntimeconfig.cache
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\menu.xnb

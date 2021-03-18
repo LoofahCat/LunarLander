@@ -1,0 +1,5 @@
+Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
+"C:/Users/Abe/source/repos/Lunar Lander/Content/435413__v-ktor__explosion12.wav","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/Content/435413__v-ktor__explosion12.xnb","SoundEffectProcessor","SoundEffectContent",86524,86391,0.2807162
+"C:/Users/Abe/source/repos/Lunar Lander/Content/lunarLander.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/Content/lunarLander.xnb","TextureProcessor","Texture2DContent",19270,993173,0.0531534
+"C:/Users/Abe/source/repos/Lunar Lander/Content/menu.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/Content/menu.xnb","TextureProcessor","Texture2DContent",13234,937285,0.1105822
+"C:/Users/Abe/source/repos/Lunar Lander/Content/space.jpg","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/Content/space.xnb","TextureProcessor","Texture2DContent",342109,4452885,0.1811564
