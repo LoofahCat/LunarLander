@@ -212,3 +212,9 @@ namespace Lunar_Lander
         }
     }
 }
+/*Strategy:
+ * Triangles need to be drawn reliably
+ * Draw two triangles:
+ * Triangle One: P1, Straight down from P1 on Y=height (YP1), and the next point on the list (P2).
+ * Triangle Two: YP1, YP2, P2
+ */
