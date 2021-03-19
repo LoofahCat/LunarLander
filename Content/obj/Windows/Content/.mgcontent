@@ -4,10 +4,10 @@
   <Platform>Windows</Platform>
   <Config />
   <SourceFiles>
-    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/435413__v-ktor__explosion12.wav</File>
-    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/lunarLander.png</File>
-    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/menu.png</File>
-    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/space.jpg</File>
+    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/435413__v-ktor__explosion12.wav</File>
+    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/lunarLander.png</File>
+    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/menu.png</File>
+    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/space.jpg</File>
   </SourceFiles>
   <DestFiles>
     <File xsi:nil="true" />
