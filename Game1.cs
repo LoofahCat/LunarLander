@@ -16,21 +16,17 @@ namespace Lunar_Lander
     public class Game1 : Game
     {
         Random random;
-        private GraphicsDevice device;
         private GraphicsDeviceManager _graphics;
         private BasicEffect basicEffect;
         private List<VertexPositionColor> vertexList;
         private List<int> indexList;
         private List<Point> polygonPoints;
         private VertexPositionColor[] vertexTri;
-        private VertexPositionTexture[] vertexTriStrip;
         private int[] indexTri;
-        private int[] indexTriStrip;
         private SpriteBatch _spriteBatch;
         int screenWidth;
         int screenHeight;
         double s;
-        int r;
         double mean = 0;
         double variance = 1;
         Texture2D backgroundTexture;
@@ -57,48 +53,112 @@ namespace Lunar_Lander
             IsMouseVisible = true;
             screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
             screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-            s = 0.3;
+            s = 0.2;
         }
+
+        public void prepNewTerrain()
+        {
+            lines.Clear();
+            vertexList.Clear();
+            indexList.Clear();
+            polygonPoints.Clear();
+            vertexTri = new VertexPositionColor[] { };
+            indexTri = new int[] { };
+        }
+        /* Notes
+         * Randomly select two landing zones (two points for each zone of a determined width)
+         * Call Divide on (P1, Z1.1), (Z1.2, Z2.1), (Z2.2, P2)
+         * Use a different rule of thumb rather than numDivisions (maybe set numDivisions = distance between points / [some-num])
+         * Record landing zone locations for win condition
+         */
 
         public void createPolygon(Point P1, Point P2)
         {
+            int x = 0;
+            int numDivisions = 10;
             polygonPoints = new List<Point>();
             polygonPoints.Add(P1);
-            polygonPoints.Add(P2);
-            Divide(P1, P2);
-            //polygonPoints.Add(new Point(0, screenHeight));
-            //polygonPoints.Add(new Point(screenWidth, screenHeight));
+            polygonPoints.Add(P2);//add landing zones depending on screen
+            Divide(P1, P2, numDivisions);
             polygonPoints.Sort((p1, p2) => (p1.X.CompareTo(p2.X)));
             for (int i = 0; i < polygonPoints.Count; i++)
             {
                 Point p = polygonPoints[i];
+                Point pY = new Point(p.X, screenHeight);
                 Vector3 vector = new Vector3(p.X, p.Y, 0);
+                Vector3 vectorY = new Vector3(pY.X, pY.Y, 0);
                 VertexPositionColor vpc = new VertexPositionColor();
+                VertexPositionColor vpcY = new VertexPositionColor();
                 vpc.Position = vector;
-                vpc.Color = Color.Red;
+                vpcY.Position = vectorY;
+                vpc.Color = Color.Black;
+                vpcY.Color = Color.Black;
                 vertexList.Add(vpc);
-                indexList.Add(i);
+                vertexList.Add(vpcY);
+                if(i == 0)
+                {
+                    //prep forward triangle only
+                    x = 0;
+                    indexList.Add(0);
+                    indexList.Add(2);
+                    indexList.Add(1);
+                }
+                else if(i == polygonPoints.Count - 1)
+                {
+                    //prep backward triangle only
+                    indexList.Add(i + 1 + x);
+                    indexList.Add(i + 2 + x);
+                    indexList.Add(i + x);
+                }
+                else
+                {
+                    //prep both forward and backward triangle
+                    //forward
+                    indexList.Add(i + 1 + x);
+                    indexList.Add(i + 2 + x);
+                    indexList.Add(i + x);
+                    //backward
+                    indexList.Add(i + 1 + x);
+                    indexList.Add(i + 3 + x);
+                    indexList.Add(i + 2 + x);
+                    x++;
+                }
             }
             vertexTri = vertexList.ToArray();
             indexTri = indexList.ToArray();
         }
 
-        public void Divide(Point P1, Point P2)
+        public void Divide(Point P1, Point P2, int numDivisions)
         {
-            //TODO: Algorithm always bringing back negative numbers
-            //================================================================
-            Random rand = new Random(); //reuse this if you are generating many
-            double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
-            double u2 = 1.0 - rand.NextDouble();
-            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
-                         Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
-            double randNormal =
-                         mean + variance * randStdNormal; //random normal(mean,stdDev^2)
-            //================================================================
+            if (numDivisions > 0)
+            {
+                //================================================================
+                Random rand = new Random(); //reuse this if you are generating many
+                double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
+                double u2 = 1.0 - rand.NextDouble();
+                double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+                             Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
+                double randNormal =
+                             mean + variance * randStdNormal; //random normal(mean,stdDev^2)
+                //================================================================
 
-            Point midPoint = new Point((int)((P2.X + P1.X)/2), (int)((P1.Y + P2.Y)/2));
-            midPoint.Y = (int)((P1.Y + P2.Y)/2 + (s * randNormal) * Math.Abs(P2.X - P1.X));
-            polygonPoints.Add(midPoint);
+                Point midPoint = new Point((int)((P2.X + P1.X) / 2), (int)((P1.Y + P2.Y) / 2));
+                if((int)((P1.Y + P2.Y) / 2 + (s * randNormal) * Math.Abs(P2.X - P1.X)) > screenHeight)
+                {
+                    midPoint.Y = (int)((P1.Y + P2.Y) / 2 + (s * randNormal * -1) * Math.Abs(P2.X - P1.X));
+                }
+                else if (((int)((P1.Y + P2.Y) / 2 + (s * randNormal) * Math.Abs(P2.X - P1.X)) < (screenHeight * 0.25)))
+                {
+                    midPoint.Y = (int)((P1.Y + P2.Y) / 2 + (s * randNormal * -1) * Math.Abs(P2.X - P1.X));
+                }
+                else
+                {
+                    midPoint.Y = (int)((P1.Y + P2.Y) / 2 + (s * randNormal) * Math.Abs(P2.X - P1.X));
+                }
+                polygonPoints.Add(midPoint);
+                Divide(P1, midPoint, numDivisions - 1);
+                Divide(midPoint, P2, numDivisions - 1);
+            }
         }
 
         public Texture2D GetDotTexure(GraphicsDevice gd)
@@ -145,7 +205,7 @@ namespace Lunar_Lander
                 case screen.MAIN:
                     if (Mouse.GetState().LeftButton == ButtonState.Pressed)
                     {
-                        mousePosition = Mouse.GetState().Position;
+                        mousePosition = Mouse.GetState().Position;//Allow for keyboard controls (arrow keys with floating box)
                         if (mousePosition.X > (screenWidth * 0.4) && mousePosition.X < screenWidth * 0.63)
                         {
                             if (mousePosition.Y > (screenHeight * 0.36) && mousePosition.Y < (screenHeight * 0.40))
@@ -167,6 +227,13 @@ namespace Lunar_Lander
                                 //CREDITS
                             }
                         }
+                    }
+                    break;
+                case screen.LEVEL1:
+                    if (Keyboard.GetState().IsKeyDown(Keys.F1))
+                    {
+                        prepNewTerrain();
+                        createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8))));
                     }
                     break;
             }
@@ -212,9 +279,3 @@ namespace Lunar_Lander
         }
     }
 }
-/*Strategy:
- * Triangles need to be drawn reliably
- * Draw two triangles:
- * Triangle One: P1, Straight down from P1 on Y=height (YP1), and the next point on the list (P2).
- * Triangle Two: YP1, YP2, P2
- */
