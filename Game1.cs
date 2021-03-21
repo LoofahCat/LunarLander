@@ -10,12 +10,33 @@ namespace Lunar_Lander
 {
     public struct Line
     {
-        Point point1;
-        Point point2;
+        public Point point1;
+        public Point point2;
+        public double length { get { return Math.Sqrt(Math.Pow((point2.X - point1.X), 2) + Math.Pow((point2.Y - point1.Y), 2)); } }
     }
+
+    public class Lander {
+        
+        //public Vector2 centerPosition { get { return new Vector2(rectangle.Left + (rectangle.Right - rectangle.Left) / 2, rectangle.Top + (rectangle.Bottom - rectangle.Top) / 2); } }
+        public Vector2 position { get; set; }
+        public float angle;
+        public double fuel;
+        public double velocity;
+
+
+    }
+
     public class Game1 : Game
     {
         Random random;
+        Lander lander;
+        Keys rotRight;
+        Keys rotLeft;
+        Keys thrust;
+        bool keyPressed;
+        Line landingZone1;
+        Line landingZone2;
+        int landingZoneWidth;
         private GraphicsDeviceManager _graphics;
         private BasicEffect basicEffect;
         private List<VertexPositionColor> vertexList;
@@ -24,6 +45,7 @@ namespace Lunar_Lander
         private VertexPositionColor[] vertexTri;
         private int[] indexTri;
         private SpriteBatch _spriteBatch;
+        private SpriteFont font;
         int screenWidth;
         int screenHeight;
         double s;
@@ -39,12 +61,17 @@ namespace Lunar_Lander
 
         public Game1()
         {
-            random = new Random();
+            random = new Random(); 
+            keyPressed = false;
+            lander = new Lander();
+            rotLeft = Keys.Left; //TODO: Allow user to access keys
+            rotRight = Keys.Right;
+            thrust = Keys.Up;
             lines = new List<Point>();
             vertexList = new List<VertexPositionColor>();
             indexList = new List<int>();
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.IsFullScreen = false;//TODO: Test with True
+            _graphics.IsFullScreen = true;//TODO: Test with True
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   
             _graphics.ApplyChanges();
@@ -54,6 +81,7 @@ namespace Lunar_Lander
             screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
             screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
             s = 0.2;
+            landingZoneWidth = 100;
         }
 
         public void prepNewTerrain()
@@ -64,22 +92,126 @@ namespace Lunar_Lander
             polygonPoints.Clear();
             vertexTri = new VertexPositionColor[] { };
             indexTri = new int[] { };
+            landingZone1.point1 = new Point();
+            landingZone1.point2 = new Point();
+            landingZone2.point1 = new Point();
+            landingZone2.point2 = new Point();
+            lander = new Lander();
+            lander.position = new Vector2(100, 100);
+            lander.velocity = 0;
+            lander.fuel = 100;
+            lander.angle = 1f;
         }
         /* Notes
          * Randomly select two landing zones (two points for each zone of a determined width)
          * Call Divide on (P1, Z1.1), (Z1.2, Z2.1), (Z2.2, P2)
-         * Use a different rule of thumb rather than numDivisions (maybe set numDivisions = distance between points / [some-num])
+         * Use a different rule of thumb rather than numDivisions (log base 2 of the length of the line for consistency on each terrain section)
          * Record landing zone locations for win condition
          */
 
         public void createPolygon(Point P1, Point P2)
         {
             int x = 0;
-            int numDivisions = 10;
+            Point LZ11 = new Point(random.Next((int)(screenWidth * 0.15), (int)(screenWidth * 0.85) - landingZoneWidth), random.Next((int)(screenHeight * 0.2), (int)(screenHeight * 0.6)));
+            Point LZ12 = new Point(LZ11.X + landingZoneWidth, LZ11.Y);
+            landingZone1.point1 = LZ11;
+            landingZone1.point2 = LZ12;
+            if (curScreen == screen.LEVEL1)
+            {
+                bool goodZone = false;
+                Point LZ21 = new Point();
+                Point LZ22 = new Point();
+                while (!goodZone)//Make sure landing zone 2 does not overlap landing zone 1 (within one landingzone width)
+                {
+                    LZ21 = new Point(random.Next((int)(screenWidth * 0.15), (int)(screenWidth * 0.85) - landingZoneWidth), random.Next((int)(screenHeight * 0.2), (int)(screenHeight * 0.6)));
+                    LZ22 = new Point(LZ21.X + landingZoneWidth, LZ21.Y);
+                    if((LZ22.X > (LZ11.X - landingZoneWidth) && LZ22.X < (LZ12.X + landingZoneWidth)) || (LZ21.X > (LZ11.X - landingZoneWidth) && LZ21.X < (LZ12.X + landingZoneWidth)))
+                    {
+                        goodZone = false;
+                    }
+                    else
+                    {
+                        goodZone = true;
+                    }
+                }
+                landingZone2.point1 = LZ21;
+                landingZone2.point2 = LZ22;
+            }
+            int ruleOfThumb; //Rule of thumb: log base 2 of line width
             polygonPoints = new List<Point>();
             polygonPoints.Add(P1);
             polygonPoints.Add(P2);//add landing zones depending on screen
-            Divide(P1, P2, numDivisions);
+            polygonPoints.Add(landingZone1.point1);
+            polygonPoints.Add(landingZone1.point2);
+            if(curScreen == screen.LEVEL1)
+            {
+                polygonPoints.Add(landingZone2.point1);
+                polygonPoints.Add(landingZone2.point2);
+            }
+            //calculate rule of thumb and run divide for each line between landing zones
+            if(curScreen == screen.LEVEL1)
+            {
+                //determine which landingzone is closer to the left
+                if(landingZone1.point1.X < landingZone2.point1.X)
+                {
+                    //landingZone1 is closer to left
+                    //P1 to lz1.1, lz1.2 to lz2.1, lz2.2 to P2
+                    Line leftToLanding1 = new Line();
+                    leftToLanding1.point1 = P1;
+                    leftToLanding1.point2 = landingZone1.point1;
+                    ruleOfThumb = (int)Math.Log2(leftToLanding1.length);
+                    Divide(leftToLanding1.point1, leftToLanding1.point2, ruleOfThumb);
+
+                    Line landing1ToLanding2 = new Line();
+                    landing1ToLanding2.point1 = landingZone1.point2;
+                    landing1ToLanding2.point2 = landingZone2.point1;
+                    ruleOfThumb = (int)Math.Log2(landing1ToLanding2.length);
+                    Divide(landing1ToLanding2.point1, landing1ToLanding2.point2, ruleOfThumb);
+
+                    Line landing2ToRight = new Line();
+                    landing2ToRight.point1 = landingZone2.point2;
+                    landing2ToRight.point2 = P2;
+                    ruleOfThumb = (int)Math.Log2(landing2ToRight.length);
+                    Divide(landing2ToRight.point1, landing2ToRight.point2, ruleOfThumb);
+                }
+                else
+                {
+                    //landingZone2 is closer to left
+                    //P1 to lz2.1, lz2.2 to lz1.1, lz1.2 to P2
+                    Line leftToLanding2 = new Line();
+                    leftToLanding2.point1 = P1;
+                    leftToLanding2.point2 = landingZone2.point1;
+                    ruleOfThumb = (int)Math.Log2(leftToLanding2.length);
+                    Divide(leftToLanding2.point1, leftToLanding2.point2, ruleOfThumb);
+
+                    Line landing2ToLanding1 = new Line();
+                    landing2ToLanding1.point1 = landingZone2.point2;
+                    landing2ToLanding1.point2 = landingZone1.point1;
+                    ruleOfThumb = (int)Math.Log2(landing2ToLanding1.length);
+                    Divide(landing2ToLanding1.point1, landing2ToLanding1.point2, ruleOfThumb);
+
+                    Line landing1ToRight = new Line();
+                    landing1ToRight.point1 = landingZone1.point2;
+                    landing1ToRight.point2 = P2;
+                    ruleOfThumb = (int)Math.Log2(landing1ToRight.length);
+                    Divide(landing1ToRight.point1, landing1ToRight.point2, ruleOfThumb);
+                }
+            }
+            else
+            {
+                Line leftToLanding = new Line();
+                leftToLanding.point1 = P1;
+                leftToLanding.point2 = landingZone1.point1;
+                ruleOfThumb = (int)Math.Log2(leftToLanding.length);
+                Divide(leftToLanding.point1, leftToLanding.point2, ruleOfThumb);
+
+                Line landingToRight = new Line();
+                landingToRight.point1 = landingZone1.point2;
+                landingToRight.point2 = P2;
+                ruleOfThumb = (int)Math.Log2(landingToRight.length);
+                Divide(landingToRight.point1, landingToRight.point2, ruleOfThumb);
+            }
+            
             polygonPoints.Sort((p1, p2) => (p1.X.CompareTo(p2.X)));
             for (int i = 0; i < polygonPoints.Count; i++)
             {
@@ -143,7 +275,7 @@ namespace Lunar_Lander
                 //================================================================
 
                 Point midPoint = new Point((int)((P2.X + P1.X) / 2), (int)((P1.Y + P2.Y) / 2));
-                if((int)((P1.Y + P2.Y) / 2 + (s * randNormal) * Math.Abs(P2.X - P1.X)) > screenHeight)
+                if((int)((P1.Y + P2.Y) / 2 + (s * randNormal) * Math.Abs(P2.X - P1.X)) > (screenHeight * 0.6))
                 {
                     midPoint.Y = (int)((P1.Y + P2.Y) / 2 + (s * randNormal * -1) * Math.Abs(P2.X - P1.X));
                 }
@@ -159,13 +291,6 @@ namespace Lunar_Lander
                 Divide(P1, midPoint, numDivisions - 1);
                 Divide(midPoint, P2, numDivisions - 1);
             }
-        }
-
-        public Texture2D GetDotTexure(GraphicsDevice gd)
-        {
-            Texture2D tex = new Texture2D(gd, 1, 1);
-            tex.SetData<Color>(new Color[1] { new Color((byte)255, (byte)255, (byte)255, (byte)255) });
-            return tex;
         }
 
         protected override void Initialize()
@@ -190,6 +315,7 @@ namespace Lunar_Lander
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            font = Content.Load<SpriteFont>("font");
             backgroundTexture = Content.Load<Texture2D>("space");
             menuTexture = Content.Load<Texture2D>("menu");
             landerTexture = Content.Load<Texture2D>("lunarLander");
@@ -212,6 +338,11 @@ namespace Lunar_Lander
                             {
                                 //PLAY
                                 createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8)))); //TODO: Random doubles in range for start points
+                                lander = new Lander();
+                                lander.position = new Vector2(100, 100);
+                                lander.velocity = 0;
+                                lander.fuel = 100;
+                                lander.angle = 1f;
                                 curScreen = screen.LEVEL1;
                             }
                             else if (mousePosition.Y > (screenHeight * 0.41) && mousePosition.Y < (screenHeight * 0.45))
@@ -232,12 +363,30 @@ namespace Lunar_Lander
                 case screen.LEVEL1:
                     if (Keyboard.GetState().IsKeyDown(Keys.F1))
                     {
-                        prepNewTerrain();
-                        createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8))));
+                        if (!keyPressed)
+                        {
+                            prepNewTerrain();
+                            createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8))));
+                            keyPressed = true;
+                        }
+                    }
+                    else if (Keyboard.GetState().IsKeyDown(rotLeft))
+                    {
+                        lander.angle -= 0.04f;
+                    }
+                    else if (Keyboard.GetState().IsKeyDown(rotRight))
+                    {
+                        lander.angle += 0.04f;
+                    }
+                    else if (Keyboard.GetState().IsKeyDown(thrust))
+                    {
+                        Vector2 direction = new Vector2((float)Math.Cos(lander.angle - Math.PI/2), (float)Math.Sin(lander.angle - Math.PI/2));
+                        lander.position += direction * 2;
                     }
                     break;
             }
-            
+            if (Keyboard.GetState().GetPressedKeyCount() == 0)
+                keyPressed = false;
 
             base.Update(gameTime);
         }
@@ -259,6 +408,8 @@ namespace Lunar_Lander
                     _spriteBatch.End();
                     break;
                 case screen.LEVEL1:
+                    _spriteBatch.Draw(landerTexture, new Rectangle((int)lander.position.X, (int)lander.position.Y, 76, 76), null, Color.White, lander.angle, new Vector2(landerTexture.Width / 2f, landerTexture.Height / 2f), SpriteEffects.None, 0);
+                    _spriteBatch.DrawString(font, "Angle: " + ((int)Math.Abs((lander.angle * (180/Math.PI)) % 360)).ToString(), new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.15)), Color.White);
                     _spriteBatch.End();
                     foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
                     {
@@ -279,3 +430,5 @@ namespace Lunar_Lander
         }
     }
 }
+
+//https://community.monogame.net/t/collision-detection-with-rotating-crosses-or-similar/7760/2

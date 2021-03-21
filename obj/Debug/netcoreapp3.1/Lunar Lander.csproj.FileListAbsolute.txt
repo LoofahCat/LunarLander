@@ -78,3 +78,4 @@ C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\runtim
 C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\runtimes\win7-x86\native\libuv.dll
 C:\Users\abe.gunther\source\repos\Abe\LunarLander\obj\Debug\netcoreapp3.1\Lunar Lander.csproj.CopyComplete
 C:\Users\abe.gunther\source\repos\Abe\LunarLander\obj\Debug\netcoreapp3.1\Lunar Lander.genruntimeconfig.cache
+C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\font.xnb

@@ -1,5 +1,6 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Users/Abe/source/repos/Lunar Lander/Content/435413__v-ktor__explosion12.wav","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/435413__v-ktor__explosion12.xnb","SoundEffectProcessor","SoundEffectContent",86524,86391,0.2992429
-"C:/Users/Abe/source/repos/Lunar Lander/Content/lunarLander.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/lunarLander.xnb","TextureProcessor","Texture2DContent",19270,993173,0.1635712
-"C:/Users/Abe/source/repos/Lunar Lander/Content/menu.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/menu.xnb","TextureProcessor","Texture2DContent",28522,756545,0.118172
-"C:/Users/Abe/source/repos/Lunar Lander/Content/space.jpg","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/space.xnb","TextureProcessor","Texture2DContent",342109,4452885,0.0959532
+"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/435413__v-ktor__explosion12.wav","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/435413__v-ktor__explosion12.xnb","SoundEffectProcessor","SoundEffectContent",86524,86391,0.3964008
+"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/font.spritefont","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/font.xnb","FontDescriptionProcessor","SpriteFontContent",2008,21538,0.1823213
+"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/lunarLander.png","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/lunarLander.xnb","TextureProcessor","Texture2DContent",44957,929381,0.1674572
+"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/menu.png","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/menu.xnb","TextureProcessor","Texture2DContent",13234,937285,0.0297734
+"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/space.jpg","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/space.xnb","TextureProcessor","Texture2DContent",342109,4452885,0.1077061
