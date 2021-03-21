@@ -1,10 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Microsoft.Xna.Framework.Media;
 
 namespace Lunar_Lander
 {
@@ -22,8 +23,6 @@ namespace Lunar_Lander
         public float angle;
         public double fuel;
         public double velocity;
-
-
     }
 
     public class Game1 : Game
@@ -34,9 +33,13 @@ namespace Lunar_Lander
         Keys rotLeft;
         Keys thrust;
         bool keyPressed;
+        bool winner;
+        bool stop;
+        bool themePlaying;
         Line landingZone1;
         Line landingZone2;
         int landingZoneWidth;
+        Point collisionPoint;
         private GraphicsDeviceManager _graphics;
         private BasicEffect basicEffect;
         private List<VertexPositionColor> vertexList;
@@ -46,6 +49,8 @@ namespace Lunar_Lander
         private int[] indexTri;
         private SpriteBatch _spriteBatch;
         private SpriteFont font;
+        private List<SoundEffect> soundEffects;
+        Song theme;
         int screenWidth;
         int screenHeight;
         double s;
@@ -54,15 +59,31 @@ namespace Lunar_Lander
         Texture2D backgroundTexture;
         Texture2D menuTexture;
         Texture2D landerTexture;
-        enum screen { MAIN, LEVEL1, LEVEL2, WIN, LOSE, CREDITS, CONTROLS, HIGH_SCORES, NULL, QUIT }
-        screen curScreen;
+        Texture2D testTexture;
+        Texture2D Win1Texture;
+        Texture2D Win2Texture;
+        Texture2D LoseTexture;
+        float gravitationalForce;
+        float horizontalMomentum;
+        DateTime lastIteration;
+        DateTime now;
+        double millisecondsElapsed;
+        DateTime themePlayTime;
+        
+        public enum screen { MAIN, LEVEL1, LEVEL2, WIN1, WIN2, LOSE, CREDITS, CONTROLS, HIGH_SCORES, NULL, QUIT }
+        public screen curScreen;
         Point mousePosition;
         public List<Point> lines;
 
         public Game1()
         {
-            random = new Random(); 
+            random = new Random();
+            polygonPoints = new List<Point>();
+            collisionPoint = new Point();
             keyPressed = false;
+            winner = false;
+            stop = false;
+            themePlaying = false;
             lander = new Lander();
             rotLeft = Keys.Left; //TODO: Allow user to access keys
             rotRight = Keys.Right;
@@ -70,6 +91,7 @@ namespace Lunar_Lander
             lines = new List<Point>();
             vertexList = new List<VertexPositionColor>();
             indexList = new List<int>();
+            soundEffects = new List<SoundEffect>();
             _graphics = new GraphicsDeviceManager(this);
             _graphics.IsFullScreen = true;//TODO: Test with True
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  
@@ -82,10 +104,14 @@ namespace Lunar_Lander
             screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
             s = 0.2;
             landingZoneWidth = 100;
+            gravitationalForce = 0;
+            horizontalMomentum = 0;
         }
 
-        public void prepNewTerrain()
+        public void prepNewTerrain(screen scr = screen.LEVEL1)
         {
+            Random random = new Random();
+            curScreen = scr;
             lines.Clear();
             vertexList.Clear();
             indexList.Clear();
@@ -97,10 +123,14 @@ namespace Lunar_Lander
             landingZone2.point1 = new Point();
             landingZone2.point2 = new Point();
             lander = new Lander();
-            lander.position = new Vector2(100, 100);
+            lander.position = new Vector2(random.Next((int)(screenWidth * 0.15), (int)(screenWidth * 0.85)), (float)(screenHeight * 0.1));
             lander.velocity = 0;
-            lander.fuel = 100;
-            lander.angle = 1f;
+            lander.fuel = scr == screen.LEVEL1 ? 100 : 50;
+            lander.angle = (float)random.Next(0, 6);
+            winner = false;
+            gravitationalForce = 0;
+            horizontalMomentum = 0;
+            lastIteration = DateTime.Now;
         }
         /* Notes
          * Randomly select two landing zones (two points for each zone of a determined width)
@@ -223,8 +253,8 @@ namespace Lunar_Lander
                 VertexPositionColor vpcY = new VertexPositionColor();
                 vpc.Position = vector;
                 vpcY.Position = vectorY;
-                vpc.Color = Color.Black;
-                vpcY.Color = Color.Black;
+                vpc.Color = Color.LightGray;
+                vpcY.Color = Color.LightGray;
                 vertexList.Add(vpc);
                 vertexList.Add(vpcY);
                 if(i == 0)
@@ -258,6 +288,17 @@ namespace Lunar_Lander
             }
             vertexTri = vertexList.ToArray();
             indexTri = indexList.ToArray();
+
+            //Include point in landing zone for win collision
+            if(curScreen == screen.LEVEL1)
+            {
+                polygonPoints.Add(new Point(landingZone1.point1.X + (landingZoneWidth / 2), landingZone1.point1.Y));
+                polygonPoints.Add(new Point(landingZone2.point1.X + (landingZoneWidth / 2), landingZone2.point1.Y));
+            }
+            else
+            {
+                polygonPoints.Add(new Point(landingZone1.point1.X + (landingZoneWidth / 2), landingZone1.point1.Y));
+            }
         }
 
         public void Divide(Point P1, Point P2, int numDivisions)
@@ -293,6 +334,49 @@ namespace Lunar_Lander
             }
         }
 
+        public bool detectCollision()
+        {
+            bool collided = false;
+            double distance = 0;
+            float landerRadius = (screenWidth * 0.03958f) / 2;
+            Point origin = new Point((int)lander.position.X, (int)lander.position.Y);
+
+            //find closest terrain point
+            List<Point> applicablePoints = polygonPoints.FindAll(x => ((x.X > origin.X - landerRadius) && (x.X < origin.X + landerRadius)));
+            List<Point> applicableYPoints = polygonPoints.FindAll(x => ((x.Y > origin.Y - landerRadius) && (x.Y < origin.Y + landerRadius)));
+            applicablePoints.AddRange(applicableYPoints);
+
+            //For each applicable point, is it within the bounding circle?
+            foreach(Point p in applicablePoints)
+            {
+                //distance formula: d=Sqrt((x2 - x1)^2 + (y2 - y1)^2)
+                distance = Math.Sqrt(Math.Pow(origin.X - p.X, 2) + Math.Pow(origin.Y - p.Y, 2));
+                if(distance < landerRadius)
+                {
+                    collided = true;
+                    collisionPoint = p;
+                }
+            }
+
+            return collided;
+        }
+
+        public bool isWin()
+        {
+            bool win = false;
+            if ((collisionPoint.X > landingZone1.point1.X && collisionPoint.X < landingZone1.point2.X)
+                || (curScreen == screen.LEVEL1 && (collisionPoint.X > landingZone2.point1.X && collisionPoint.X < landingZone2.point2.X)))
+            {
+                if ((((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) < 5 && ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) >= 0)
+                        || ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) > 355 && ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) <= 360
+                        && gravitationalForce < 0.4f)
+                {
+                    win = true;
+                }
+            }
+            return win;
+        }
+
         protected override void Initialize()
         {
             _graphics.GraphicsDevice.RasterizerState = new RasterizerState
@@ -319,10 +403,19 @@ namespace Lunar_Lander
             backgroundTexture = Content.Load<Texture2D>("space");
             menuTexture = Content.Load<Texture2D>("menu");
             landerTexture = Content.Load<Texture2D>("lunarLander");
+            testTexture = Content.Load<Texture2D>("test");
+            soundEffects.Add(Content.Load<SoundEffect>("435413__v-ktor__explosion12"));
+            soundEffects.Add(Content.Load<SoundEffect>("success"));
+            theme = Content.Load<Song>("bensound-slowmotion");
+            Win1Texture = Content.Load<Texture2D>("Win1");
+            Win2Texture = Content.Load<Texture2D>("Win2");
+            LoseTexture = Content.Load<Texture2D>("Lose");
         }
 
         protected override void Update(GameTime gameTime)
         {
+            now = DateTime.Now;
+            millisecondsElapsed = (now - lastIteration).TotalMilliseconds;
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -337,13 +430,8 @@ namespace Lunar_Lander
                             if (mousePosition.Y > (screenHeight * 0.36) && mousePosition.Y < (screenHeight * 0.40))
                             {
                                 //PLAY
+                                prepNewTerrain(screen.LEVEL1);
                                 createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8)))); //TODO: Random doubles in range for start points
-                                lander = new Lander();
-                                lander.position = new Vector2(100, 100);
-                                lander.velocity = 0;
-                                lander.fuel = 100;
-                                lander.angle = 1f;
-                                curScreen = screen.LEVEL1;
                             }
                             else if (mousePosition.Y > (screenHeight * 0.41) && mousePosition.Y < (screenHeight * 0.45))
                             {
@@ -360,7 +448,17 @@ namespace Lunar_Lander
                         }
                     }
                     break;
+                case screen.WIN1:
+                case screen.WIN2:
+                    System.Threading.Thread.Sleep(3000);
+                    if (curScreen == screen.WIN1)
+                    {
+                        prepNewTerrain(screen.LEVEL2);
+                        createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8)))); //TODO: Random doubles in range for start points
+                    }
+                    break;
                 case screen.LEVEL1:
+                case screen.LEVEL2:
                     if (Keyboard.GetState().IsKeyDown(Keys.F1))
                     {
                         if (!keyPressed)
@@ -380,19 +478,88 @@ namespace Lunar_Lander
                     }
                     else if (Keyboard.GetState().IsKeyDown(thrust))
                     {
-                        Vector2 direction = new Vector2((float)Math.Cos(lander.angle - Math.PI/2), (float)Math.Sin(lander.angle - Math.PI/2));
-                        lander.position += direction * 2;
+                        if (lander.fuel > 0)
+                        {
+                            Vector2 direction = new Vector2((float)Math.Cos(lander.angle - Math.PI / 2), (float)Math.Sin(lander.angle - Math.PI / 2));
+                            horizontalMomentum += direction.X * 0.04f;
+                            gravitationalForce += direction.Y * 0.04f;
+                            lander.fuel -= 0.1f;
+                        }
                     }
+
+                    if (detectCollision() && !stop)
+                    {
+                        //detect win/loss condition
+                        if (isWin())
+                        {
+                            //1. Wait while sound plays
+                            //2. play sound
+                            //3. Switch to WIN1 screen
+                            MediaPlayer.Stop();
+                            soundEffects[1].CreateInstance().Play();
+                            stop = true;
+                            System.Threading.Thread.Sleep(1000);
+                            if (curScreen == screen.LEVEL1)
+                                curScreen = screen.WIN1;
+                            else
+                                curScreen = screen.WIN2;
+                            stop = false;
+                            themePlaying = false;
+                            winner = true;
+                        }
+                        else
+                        {
+                            //1. Wait while ship explodes
+                            //2. play sound
+                            //3. Switch to lose screen
+                            MediaPlayer.Stop();
+                            soundEffects[0].CreateInstance().Play();
+                            stop = true;
+                            System.Threading.Thread.Sleep(1000);
+                            curScreen = screen.LOSE;
+                            stop = false;
+                            themePlaying = false;
+                        }
+                    }
+
+                    //Move Lander
+                    //Lander position.X += horizontalmomentum
+                    //Lander Position.Y += gravitationalForce
+                    //Given direction of lander, increment/decrement gravity and momentum given thrust_YN
+                    Vector2 movement = new Vector2(horizontalMomentum, gravitationalForce);
+                    lander.position += movement * (int)millisecondsElapsed * 0.2f;
+                    gravitationalForce += 0.01f;
+                    if(horizontalMomentum != 0)
+                    {
+                        if(horizontalMomentum > 0)
+                            horizontalMomentum -= 0.01f;
+                        else
+                            horizontalMomentum += 0.01f;
+                    }
+                    
                     break;
             }
             if (Keyboard.GetState().GetPressedKeyCount() == 0)
                 keyPressed = false;
-
+            lastIteration = now;
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
+            if (!themePlaying)
+            {
+                MediaPlayer.Play(theme);
+                themePlaying = true;
+                themePlayTime = DateTime.Now;
+            }
+            else
+            {
+                if(themePlayTime.AddMilliseconds(theme.Duration.TotalMilliseconds) < now)
+                {
+                    themePlaying = false;
+                }
+            }
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
@@ -408,8 +575,30 @@ namespace Lunar_Lander
                     _spriteBatch.End();
                     break;
                 case screen.LEVEL1:
+                case screen.LEVEL2:
                     _spriteBatch.Draw(landerTexture, new Rectangle((int)lander.position.X, (int)lander.position.Y, 76, 76), null, Color.White, lander.angle, new Vector2(landerTexture.Width / 2f, landerTexture.Height / 2f), SpriteEffects.None, 0);
-                    _spriteBatch.DrawString(font, "Angle: " + ((int)Math.Abs((lander.angle * (180/Math.PI)) % 360)).ToString(), new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.15)), Color.White);
+                    //_spriteBatch.Draw(testTexture, new Rectangle(((int)lander.position.X), ((int)lander.position.Y), 10, 10), Color.White);
+                    if((((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) < 5 && ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) >= 0)
+                        || ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) > 355 && ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) <=360)
+                        _spriteBatch.DrawString(font, "Angle: " + ((int)Math.Abs((lander.angle * (180/Math.PI)) % 360)).ToString(), new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.15)), Color.LightGreen);
+                    else
+                        _spriteBatch.DrawString(font, "Angle: " + ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)).ToString(), new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.15)), Color.White);
+                    if(lander.fuel > 0)
+                    {
+                        _spriteBatch.DrawString(font, "Fuel: " + (Math.Truncate(lander.fuel * 100) / 100).ToString(), new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.20)), Color.LightGreen);
+                    }
+                    else
+                    {
+                        _spriteBatch.DrawString(font, "Fuel: 0", new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.20)), Color.White);
+                    }
+                    if(gravitationalForce > 0.4f)
+                    {
+                        _spriteBatch.DrawString(font, "Velocity: " + (Math.Abs(Math.Truncate(gravitationalForce * 10))).ToString(), new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.25)), Color.White);
+                    }
+                    else
+                    {
+                        _spriteBatch.DrawString(font, "Velocity: " + (Math.Abs(Math.Truncate(gravitationalForce * 10))).ToString(), new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.25)), Color.LightGreen);
+                    }
                     _spriteBatch.End();
                     foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
                     {
@@ -421,6 +610,18 @@ namespace Lunar_Lander
                             indexTri, 0, indexTri.Length / 3);
                     }
                     break;
+                case screen.WIN1:
+                    _spriteBatch.Draw(Win1Texture, new Rectangle(screenWidth / 4, (int)(screenHeight * 0.21), screenWidth / 2, (int)(screenHeight * 0.42)), Color.White);
+                    _spriteBatch.End();
+                    break;
+                case screen.WIN2:
+                    _spriteBatch.Draw(Win2Texture, new Rectangle(screenWidth / 4, (int)(screenHeight * 0.21), screenWidth / 2, (int)(screenHeight * 0.42)), Color.White);
+                    _spriteBatch.End();
+                    break;
+                case screen.LOSE:
+                    _spriteBatch.Draw(LoseTexture, new Rectangle(screenWidth / 4, (int)(screenHeight * 0.21), screenWidth / 2, (int)(screenHeight * 0.42)), Color.White);
+                    _spriteBatch.End();
+                    break;
             }
 
             
@@ -430,5 +631,3 @@ namespace Lunar_Lander
         }
     }
 }
-
-//https://community.monogame.net/t/collision-detection-with-rotating-crosses-or-similar/7760/2

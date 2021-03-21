@@ -79,3 +79,11 @@ C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\runtim
 C:\Users\abe.gunther\source\repos\Abe\LunarLander\obj\Debug\netcoreapp3.1\Lunar Lander.csproj.CopyComplete
 C:\Users\abe.gunther\source\repos\Abe\LunarLander\obj\Debug\netcoreapp3.1\Lunar Lander.genruntimeconfig.cache
 C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\font.xnb
+C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\test.xnb
+C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\bensound-slowmotion.wma
+C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\bensound-slowmotion.xnb
+C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\success.xnb
+C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\Lose.xnb
+C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\menuFont.xnb
+C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\Win1.xnb
+C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\Win2.xnb
