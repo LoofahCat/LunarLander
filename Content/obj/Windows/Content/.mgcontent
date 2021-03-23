@@ -4,20 +4,24 @@
   <Platform>Windows</Platform>
   <Config />
   <SourceFiles>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/435413__v-ktor__explosion12.wav</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bensound-slowmotion.mp3</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/font.spritefont</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/Lose.png</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/lunarLander.png</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/menu.png</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/menuFont.spritefont</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/space.jpg</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/success.wav</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/test.png</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/Win1.png</File>
-    <File>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/Win2.png</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/435413__v-ktor__explosion12.wav</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/bensound-slowmotion.mp3</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/fire.png</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/font.spritefont</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/Lose.png</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/lunarLander.png</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/menu.png</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/menuFont.spritefont</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/smoke.png</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/space.jpg</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/success.wav</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/test.png</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/Win1.png</File>
+    <File>C:/Users/Abe/source/repos/Lunar Lander/Content/Win2.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

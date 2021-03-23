@@ -17,8 +17,6 @@ namespace Lunar_Lander
     }
 
     public class Lander {
-        
-        //public Vector2 centerPosition { get { return new Vector2(rectangle.Left + (rectangle.Right - rectangle.Left) / 2, rectangle.Top + (rectangle.Bottom - rectangle.Top) / 2); } }
         public Vector2 position { get; set; }
         public float angle;
         public double fuel;
@@ -36,10 +34,14 @@ namespace Lunar_Lander
         bool winner;
         bool stop;
         bool themePlaying;
+        bool emitParticles;
+        bool crashed;
         Line landingZone1;
         Line landingZone2;
         int landingZoneWidth;
         Point collisionPoint;
+        ParticleEmitter particleEmitterSmoke;
+        ParticleEmitter particleEmitterFire;
         private GraphicsDeviceManager _graphics;
         private BasicEffect basicEffect;
         private List<VertexPositionColor> vertexList;
@@ -83,7 +85,9 @@ namespace Lunar_Lander
             keyPressed = false;
             winner = false;
             stop = false;
+            emitParticles = false;
             themePlaying = false;
+            crashed = false;
             lander = new Lander();
             rotLeft = Keys.Left; //TODO: Allow user to access keys
             rotRight = Keys.Right;
@@ -93,7 +97,7 @@ namespace Lunar_Lander
             indexList = new List<int>();
             soundEffects = new List<SoundEffect>();
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.IsFullScreen = true;//TODO: Test with True
+            _graphics.IsFullScreen = false;//TODO: Test with True
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   
             _graphics.ApplyChanges();
@@ -128,9 +132,29 @@ namespace Lunar_Lander
             lander.fuel = scr == screen.LEVEL1 ? 100 : 50;
             lander.angle = (float)random.Next(0, 6);
             winner = false;
+            crashed = false;
             gravitationalForce = 0;
             horizontalMomentum = 0;
             lastIteration = DateTime.Now;
+            particleEmitterSmoke = new ParticleEmitter(
+            Content, 
+            new TimeSpan(0, 0, 0, 0, 2), 
+            (int)lander.position.X, 
+            (int)lander.position.Y, 
+            20, 
+            200, 
+            new TimeSpan(0, 0, 2), 
+            new TimeSpan(0, 0, 0, 3000));
+            particleEmitterFire = new ParticleEmitter(
+            Content,
+            new TimeSpan(0, 0, 0, 0, 10),
+            (int)lander.position.X, 
+            (int)lander.position.Y, 
+            40,
+            300,
+            new TimeSpan(0, 0, 0, 0, 1000),
+            new TimeSpan(0, 0, 0, 0, 800));
+            
         }
         /* Notes
          * Randomly select two landing zones (two points for each zone of a determined width)
@@ -468,23 +492,45 @@ namespace Lunar_Lander
                             keyPressed = true;
                         }
                     }
-                    else if (Keyboard.GetState().IsKeyDown(rotLeft))
+                    if (Keyboard.GetState().IsKeyDown(rotLeft))
                     {
                         lander.angle -= 0.04f;
                     }
-                    else if (Keyboard.GetState().IsKeyDown(rotRight))
+                    if (Keyboard.GetState().IsKeyDown(rotRight))
                     {
                         lander.angle += 0.04f;
                     }
-                    else if (Keyboard.GetState().IsKeyDown(thrust))
+                    if (Keyboard.GetState().IsKeyDown(thrust))
                     {
+
                         if (lander.fuel > 0)
                         {
+                            emitParticles = true;
                             Vector2 direction = new Vector2((float)Math.Cos(lander.angle - Math.PI / 2), (float)Math.Sin(lander.angle - Math.PI / 2));
                             horizontalMomentum += direction.X * 0.04f;
                             gravitationalForce += direction.Y * 0.04f;
                             lander.fuel -= 0.1f;
                         }
+                        else
+                            emitParticles = false;
+                    }
+                    else
+                    {
+                        emitParticles = false;
+                    }
+
+                    if (crashed)
+                    {
+                        //particleEmitterFire.shipCrash(lander.position);
+                        //particleEmitterSmoke.shipCrash(lander.position);
+                        particleEmitterFire.shipThrust(gameTime, lander.position, true, 0);
+                        particleEmitterSmoke.shipThrust(gameTime, lander.position, true, 0);
+                    }
+                    else
+                    {
+                        float landerRadius = (screenWidth * 0.03958f) / 2;
+                        particleEmitterSmoke.shipThrust(gameTime, lander.position + new Vector2(((float)Math.Cos(lander.angle + Math.PI / 2) * landerRadius), ((float)Math.Sin(lander.angle + Math.PI / 2) * landerRadius)), emitParticles, lander.angle, 0.3);
+                        particleEmitterFire.shipThrust(gameTime, lander.position + new Vector2(((float)Math.Cos(lander.angle + Math.PI / 2) * landerRadius), ((float)Math.Sin(lander.angle + Math.PI / 2) * landerRadius)), emitParticles, lander.angle, 0.2);
                     }
 
                     if (detectCollision() && !stop)
@@ -515,26 +561,34 @@ namespace Lunar_Lander
                             MediaPlayer.Stop();
                             soundEffects[0].CreateInstance().Play();
                             stop = true;
-                            System.Threading.Thread.Sleep(1000);
-                            curScreen = screen.LOSE;
-                            stop = false;
+                            crashed = true;
+                            lander.fuel = 0;
+                            lander.angle = 0;
+                            gravitationalForce = 0;
+                            //System.Threading.Thread.Sleep(1000);
+                            //curScreen = screen.LOSE;
+                            //stop = false;
                             themePlaying = false;
                         }
                     }
 
-                    //Move Lander
-                    //Lander position.X += horizontalmomentum
-                    //Lander Position.Y += gravitationalForce
-                    //Given direction of lander, increment/decrement gravity and momentum given thrust_YN
-                    Vector2 movement = new Vector2(horizontalMomentum, gravitationalForce);
-                    lander.position += movement * (int)millisecondsElapsed * 0.2f;
-                    gravitationalForce += 0.01f;
-                    if(horizontalMomentum != 0)
+
+                    if (!stop)
                     {
-                        if(horizontalMomentum > 0)
-                            horizontalMomentum -= 0.01f;
-                        else
-                            horizontalMomentum += 0.01f;
+                        //Move Lander
+                        //Lander position.X += horizontalmomentum
+                        //Lander Position.Y += gravitationalForce
+                        //Given direction of lander, increment/decrement gravity and momentum given thrust_YN
+                        Vector2 movement = new Vector2(horizontalMomentum, gravitationalForce);
+                        lander.position += movement * (int)millisecondsElapsed * 0.2f;
+                        gravitationalForce += 0.01f;
+                        if (horizontalMomentum != 0)
+                        {
+                            if (horizontalMomentum > 0)
+                                horizontalMomentum -= 0.01f;
+                            else
+                                horizontalMomentum += 0.01f;
+                        }
                     }
                     
                     break;
@@ -576,8 +630,9 @@ namespace Lunar_Lander
                     break;
                 case screen.LEVEL1:
                 case screen.LEVEL2:
-                    _spriteBatch.Draw(landerTexture, new Rectangle((int)lander.position.X, (int)lander.position.Y, 76, 76), null, Color.White, lander.angle, new Vector2(landerTexture.Width / 2f, landerTexture.Height / 2f), SpriteEffects.None, 0);
-                    //_spriteBatch.Draw(testTexture, new Rectangle(((int)lander.position.X), ((int)lander.position.Y), 10, 10), Color.White);
+                    if(!crashed)
+                        _spriteBatch.Draw(landerTexture, new Rectangle((int)lander.position.X, (int)lander.position.Y, 76, 76), null, Color.White, lander.angle, new Vector2(landerTexture.Width / 2f, landerTexture.Height / 2f), SpriteEffects.None, 0);
+                   
                     if((((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) < 5 && ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) >= 0)
                         || ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) > 355 && ((int)Math.Abs((lander.angle * (180 / Math.PI)) % 360)) <=360)
                         _spriteBatch.DrawString(font, "Angle: " + ((int)Math.Abs((lander.angle * (180/Math.PI)) % 360)).ToString(), new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.15)), Color.LightGreen);
@@ -599,6 +654,12 @@ namespace Lunar_Lander
                     {
                         _spriteBatch.DrawString(font, "Velocity: " + (Math.Abs(Math.Truncate(gravitationalForce * 10))).ToString(), new Vector2((float)(screenWidth * 0.85), (float)(screenHeight * 0.25)), Color.LightGreen);
                     }
+
+                    //if thrust is engaged, draw particles
+
+                    particleEmitterSmoke.Draw(_spriteBatch);
+                    particleEmitterFire.Draw(_spriteBatch);
+                    
                     _spriteBatch.End();
                     foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
                     {

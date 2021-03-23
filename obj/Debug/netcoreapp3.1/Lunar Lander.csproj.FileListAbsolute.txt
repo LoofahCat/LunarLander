@@ -87,3 +87,14 @@ C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Conten
 C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\menuFont.xnb
 C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\Win1.xnb
 C:\Users\abe.gunther\source\repos\Abe\LunarLander\bin\Debug\netcoreapp3.1\Content\Win2.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\bensound-slowmotion.wma
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\bensound-slowmotion.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\font.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\Lose.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\menuFont.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\success.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\test.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\Win1.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\Win2.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\fire.xnb
+C:\Users\Abe\source\repos\Lunar Lander\bin\Debug\netcoreapp3.1\Content\smoke.xnb

@@ -1,13 +1,15 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/435413__v-ktor__explosion12.wav","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/435413__v-ktor__explosion12.xnb","SoundEffectProcessor","SoundEffectContent",86524,86391,0.3964008
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bensound-slowmotion.mp3","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/bensound-slowmotion.xnb","SongProcessor","SongContent",2897919,137,1.2883446
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/font.spritefont","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/font.xnb","FontDescriptionProcessor","SpriteFontContent",2005,37922,0.1122947
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/Lose.png","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/Lose.xnb","TextureProcessor","Texture2DContent",6604,1018249,0.1312356
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/lunarLander.png","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/lunarLander.xnb","TextureProcessor","Texture2DContent",40130,562549,0.1271221
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/menu.png","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/menu.xnb","TextureProcessor","Texture2DContent",13234,937285,0.0297734
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/menuFont.spritefont","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/menuFont.xnb","FontDescriptionProcessor","SpriteFontContent",2006,70690,0.1830545
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/space.jpg","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/space.xnb","TextureProcessor","Texture2DContent",683931,36000085,0.715507
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/success.wav","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/success.xnb","SoundEffectProcessor","SoundEffectContent",354920,354645,0.1741701
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/test.png","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/test.xnb","TextureProcessor","Texture2DContent",1758,929381,0.1546144
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/Win1.png","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/Win1.xnb","TextureProcessor","Texture2DContent",10204,1920085,0.045907
-"C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/Win2.png","C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/Win2.xnb","TextureProcessor","Texture2DContent",5232,961705,0.0283285
+"C:/Users/Abe/source/repos/Lunar Lander/Content/435413__v-ktor__explosion12.wav","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/435413__v-ktor__explosion12.xnb","SoundEffectProcessor","SoundEffectContent",86524,86391,0.2990668
+"C:/Users/Abe/source/repos/Lunar Lander/Content/bensound-slowmotion.mp3","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/bensound-slowmotion.xnb","SongProcessor","SongContent",2897919,137,1.0108819
+"C:/Users/Abe/source/repos/Lunar Lander/Content/fire.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/fire.xnb","TextureProcessor","Texture2DContent",121651,262229,0.1495964
+"C:/Users/Abe/source/repos/Lunar Lander/Content/font.spritefont","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/font.xnb","FontDescriptionProcessor","SpriteFontContent",2065,37922,0.1203307
+"C:/Users/Abe/source/repos/Lunar Lander/Content/Lose.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/Lose.xnb","TextureProcessor","Texture2DContent",6604,1018249,0.0233456
+"C:/Users/Abe/source/repos/Lunar Lander/Content/lunarLander.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/lunarLander.xnb","TextureProcessor","Texture2DContent",40130,562549,0.0180727
+"C:/Users/Abe/source/repos/Lunar Lander/Content/menu.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/menu.xnb","TextureProcessor","Texture2DContent",13234,937285,0.0249593
+"C:/Users/Abe/source/repos/Lunar Lander/Content/menuFont.spritefont","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/menuFont.xnb","FontDescriptionProcessor","SpriteFontContent",2066,70690,0.0265037
+"C:/Users/Abe/source/repos/Lunar Lander/Content/smoke.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/smoke.xnb","TextureProcessor","Texture2DContent",7533,24985,0.007408
+"C:/Users/Abe/source/repos/Lunar Lander/Content/space.jpg","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/space.xnb","TextureProcessor","Texture2DContent",683931,36000085,0.6741933
+"C:/Users/Abe/source/repos/Lunar Lander/Content/success.wav","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/success.xnb","SoundEffectProcessor","SoundEffectContent",354920,354645,0.0980564
+"C:/Users/Abe/source/repos/Lunar Lander/Content/test.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/test.xnb","TextureProcessor","Texture2DContent",1758,929381,0.0206119
+"C:/Users/Abe/source/repos/Lunar Lander/Content/Win1.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/Win1.xnb","TextureProcessor","Texture2DContent",10204,1920085,0.0323351
+"C:/Users/Abe/source/repos/Lunar Lander/Content/Win2.png","C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/Win2.xnb","TextureProcessor","Texture2DContent",5232,961705,0.0195526

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <SourceFile>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/435413__v-ktor__explosion12.wav</SourceFile>
-  <SourceTime>2021-03-17T21:19:58.243655-06:00</SourceTime>
-  <DestFile>C:/Users/abe.gunther/source/repos/Abe/LunarLander/Content/bin/Windows/435413__v-ktor__explosion12.xnb</DestFile>
-  <DestTime>2021-03-21T00:21:49.214338-06:00</DestTime>
+  <SourceFile>C:/Users/Abe/source/repos/Lunar Lander/Content/435413__v-ktor__explosion12.wav</SourceFile>
+  <SourceTime>2021-03-15T20:50:11.0903006-06:00</SourceTime>
+  <DestFile>C:/Users/Abe/source/repos/Lunar Lander/Content/bin/Windows/435413__v-ktor__explosion12.xnb</DestFile>
+  <DestTime>2021-03-22T21:22:24.1430763-06:00</DestTime>
   <Importer>WavImporter</Importer>
   <ImporterTime>2020-08-10T16:17:54-06:00</ImporterTime>
   <Processor>SoundEffectProcessor</Processor>
