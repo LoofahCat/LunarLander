@@ -81,13 +81,13 @@ namespace Lunar_Lander
         /// 
         public void shipCrash(Vector2 position)
         {
-            m_rate = new TimeSpan(0, 0, 0, 100);
+            m_rate = new TimeSpan(0, 0, 0, 0, 5);
             m_sourceX = (int)position.X;
             m_sourceY = (int)position.Y;
             m_particleSize = 60;
-            m_speed = 500;
-            m_lifetime = new TimeSpan(0, 0, 0, 0, 800);
-            m_switchover = new TimeSpan(0, 0, 0, 0, 700);
+            m_speed = 150;
+            m_lifetime = new TimeSpan(0, 0, 0, 0, 500);
+            m_switchover = new TimeSpan(0, 0, 0, 0, 100);
 
         }
         public void shipThrust(GameTime gameTime, Vector2 position, bool emitParticles, float angle, double dev = 0)
@@ -213,9 +213,9 @@ namespace Lunar_Lander
         /// <summary>
         /// Generate a random vector about a unit circle
         /// </summary>
-        public Vector2 nextCircleVector(float angle = 0, double stdDev = 0.1)
+        public Vector2 nextCircleVector(float angle = -1, double stdDev = 0.1)
         {
-            if(angle == 0)
+            if(angle == -1)
                 angle = (float)(this.NextDouble() * 2.0 * Math.PI);
             else
             {

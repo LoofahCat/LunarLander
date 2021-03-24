@@ -1,21 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Abe\\source\\repos\\Lunar Lander\\Lunar Lander.csproj": {}
+    "C:\\Users\\abe.gunther\\source\\repos\\Abe\\LunarLander\\Lunar Lander.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Abe\\source\\repos\\Lunar Lander\\Lunar Lander.csproj": {
+    "C:\\Users\\abe.gunther\\source\\repos\\Abe\\LunarLander\\Lunar Lander.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Abe\\source\\repos\\Lunar Lander\\Lunar Lander.csproj",
+        "projectUniqueName": "C:\\Users\\abe.gunther\\source\\repos\\Abe\\LunarLander\\Lunar Lander.csproj",
         "projectName": "Lunar Lander",
-        "projectPath": "C:\\Users\\Abe\\source\\repos\\Lunar Lander\\Lunar Lander.csproj",
-        "packagesPath": "C:\\Users\\Abe\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Abe\\source\\repos\\Lunar Lander\\obj\\",
+        "projectPath": "C:\\Users\\abe.gunther\\source\\repos\\Abe\\LunarLander\\Lunar Lander.csproj",
+        "packagesPath": "C:\\Users\\abe.gunther\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\abe.gunther\\source\\repos\\Abe\\LunarLander\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Abe\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\abe.gunther\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp3.1"
@@ -26,6 +30,7 @@
         },
         "frameworks": {
           "netcoreapp3.1": {
+            "targetAlias": "netcoreapp3.1",
             "projectReferences": {}
           }
         },
@@ -37,6 +42,7 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
+          "targetAlias": "netcoreapp3.1",
           "dependencies": {
             "MonoGame.Content.Builder.Task": {
               "target": "Package",
@@ -65,7 +71,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.201\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     }

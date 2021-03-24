@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Media;
+using System.IO;
 
 namespace Lunar_Lander
 {
@@ -25,20 +26,26 @@ namespace Lunar_Lander
 
     public class Game1 : Game
     {
+        public static int[] HighScores { get; set; }
+        public Keys[] KeyConfig { get; set; }
+        public static int currentScore { get; set; }
         Random random;
+        Menu myMenu;
         Lander lander;
         Keys rotRight;
         Keys rotLeft;
         Keys thrust;
         bool keyPressed;
-        bool winner;
+        public static bool winner { get; set; }
         bool stop;
+        bool changingKey;
         bool themePlaying;
         bool emitParticles;
         bool crashed;
         Line landingZone1;
         Line landingZone2;
         int landingZoneWidth;
+        int transitionTime;
         Point collisionPoint;
         ParticleEmitter particleEmitterSmoke;
         ParticleEmitter particleEmitterFire;
@@ -58,13 +65,8 @@ namespace Lunar_Lander
         double s;
         double mean = 0;
         double variance = 1;
-        Texture2D backgroundTexture;
-        Texture2D menuTexture;
         Texture2D landerTexture;
-        Texture2D testTexture;
-        Texture2D Win1Texture;
-        Texture2D Win2Texture;
-        Texture2D LoseTexture;
+
         float gravitationalForce;
         float horizontalMomentum;
         DateTime lastIteration;
@@ -73,13 +75,13 @@ namespace Lunar_Lander
         DateTime themePlayTime;
         
         public enum screen { MAIN, LEVEL1, LEVEL2, WIN1, WIN2, LOSE, CREDITS, CONTROLS, HIGH_SCORES, NULL, QUIT }
+        public enum action { PLAY, HIGH_SCORES, CREDITS, CONTROLS, BACK, QUIT, CONTINUE, CHANGE_UP, CHANGE_LEFT, CHANGE_RIGHT, NULL }
         public screen curScreen;
         Point mousePosition;
         public List<Point> lines;
 
         public Game1()
         {
-            random = new Random();
             polygonPoints = new List<Point>();
             collisionPoint = new Point();
             keyPressed = false;
@@ -88,33 +90,118 @@ namespace Lunar_Lander
             emitParticles = false;
             themePlaying = false;
             crashed = false;
+            changingKey = false;
             lander = new Lander();
-            rotLeft = Keys.Left; //TODO: Allow user to access keys
-            rotRight = Keys.Right;
-            thrust = Keys.Up;
             lines = new List<Point>();
             vertexList = new List<VertexPositionColor>();
             indexList = new List<int>();
             soundEffects = new List<SoundEffect>();
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.IsFullScreen = false;//TODO: Test with True
+            _graphics.IsFullScreen = true;
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   
             _graphics.ApplyChanges();
             curScreen = screen.MAIN;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
             s = 0.2;
             landingZoneWidth = 100;
             gravitationalForce = 0;
             horizontalMomentum = 0;
+            screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            random = new Random();
+
+            LoadKeys();
+            LoadScores();
+            rotLeft = KeyConfig[1];
+            rotRight = KeyConfig[2];
+            thrust = KeyConfig[0];
+
+            myMenu = new Menu(Content, screenWidth, screenHeight, thrust, rotRight, rotLeft);
+        }
+
+        public void LoadKeys()
+        {
+            KeyConfig = new Keys[3];
+            string line = "";
+            int iterator = 0;
+            System.IO.StreamReader reader = new System.IO.StreamReader(Content.RootDirectory + "/keyConfig.txt");
+            while((line = reader.ReadLine()) != null)
+            {
+                Keys key = (Keys)Enum.Parse(typeof(Keys), line, true);
+                KeyConfig[iterator] = key;
+                iterator++;
+            }
+        }
+
+        public void SaveKeys()
+        {
+            using (StreamWriter outputFile = new StreamWriter(Content.RootDirectory + "/keyConfig.txt"))
+            {
+                foreach (Keys key in KeyConfig)
+                {
+                    outputFile.WriteLine(key.ToString());
+                }
+            }
+        }
+
+        public void SaveHighScores()
+        {
+            using (StreamWriter outputFile = new StreamWriter(Content.RootDirectory + "/HighScores.txt"))
+            {
+                foreach(int score in HighScores)
+                {
+                    outputFile.WriteLine(score.ToString());
+                }
+            }
+        }
+
+        public void LoadScores()
+        {
+            HighScores = new int[5];
+            string line = "";
+            int iterator = 0;
+            System.IO.StreamReader reader = new System.IO.StreamReader(Content.RootDirectory + "/HighScores.txt");
+            while ((line = reader.ReadLine()) != null)
+            {
+                HighScores[iterator] = Int32.Parse(line);
+                iterator++;
+            }
+        }
+
+        public void generateScore()
+        {
+            bool replaced = false;
+            if (curScreen == screen.WIN1)
+            {
+                currentScore += (int)lander.fuel * 5;
+            }
+            else if (curScreen == screen.WIN2)
+            {
+                currentScore += (int)lander.fuel * 50;
+            }
+            for(int i = 0; i < HighScores.Length; i++)
+            {
+                if(currentScore > HighScores[i] && !replaced)
+                {
+                    HighScores[i] = currentScore;
+                    replaced = true;
+                }
+            }
+        }
+
+        public void Quit()
+        {
+            SaveHighScores();
+            SaveKeys();
+            Exit();
         }
 
         public void prepNewTerrain(screen scr = screen.LEVEL1)
         {
             Random random = new Random();
+            stop = false;
             curScreen = scr;
             lines.Clear();
             vertexList.Clear();
@@ -122,6 +209,7 @@ namespace Lunar_Lander
             polygonPoints.Clear();
             vertexTri = new VertexPositionColor[] { };
             indexTri = new int[] { };
+            transitionTime = 0;
             landingZone1.point1 = new Point();
             landingZone1.point2 = new Point();
             landingZone2.point1 = new Point();
@@ -424,177 +512,236 @@ namespace Lunar_Lander
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("font");
-            backgroundTexture = Content.Load<Texture2D>("space");
-            menuTexture = Content.Load<Texture2D>("menu");
             landerTexture = Content.Load<Texture2D>("lunarLander");
-            testTexture = Content.Load<Texture2D>("test");
             soundEffects.Add(Content.Load<SoundEffect>("435413__v-ktor__explosion12"));
             soundEffects.Add(Content.Load<SoundEffect>("success"));
             theme = Content.Load<Song>("bensound-slowmotion");
-            Win1Texture = Content.Load<Texture2D>("Win1");
-            Win2Texture = Content.Load<Texture2D>("Win2");
-            LoseTexture = Content.Load<Texture2D>("Lose");
+
         }
 
         protected override void Update(GameTime gameTime)
         {
             now = DateTime.Now;
             millisecondsElapsed = (now - lastIteration).TotalMilliseconds;
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            switch (curScreen)
+            action act = myMenu.Update(curScreen);
+            if (changingKey)
             {
-                case screen.MAIN:
-                    if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+                if(Keyboard.GetState().GetPressedKeyCount() == 1 && Keyboard.GetState().IsKeyUp(Keys.Enter))
+                {
+                    if (thrust == Keys.None)
                     {
-                        mousePosition = Mouse.GetState().Position;//Allow for keyboard controls (arrow keys with floating box)
-                        if (mousePosition.X > (screenWidth * 0.4) && mousePosition.X < screenWidth * 0.63)
-                        {
-                            if (mousePosition.Y > (screenHeight * 0.36) && mousePosition.Y < (screenHeight * 0.40))
-                            {
-                                //PLAY
-                                prepNewTerrain(screen.LEVEL1);
-                                createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8)))); //TODO: Random doubles in range for start points
-                            }
-                            else if (mousePosition.Y > (screenHeight * 0.41) && mousePosition.Y < (screenHeight * 0.45))
-                            {
-                                //HIGH SCORES
-                            }
-                            else if (mousePosition.Y > (screenHeight * 0.46) && mousePosition.Y < (screenHeight * 0.49))
-                            {
-                                //CONTROLS
-                            }
-                            else if (mousePosition.Y > (screenHeight * 0.5) && mousePosition.Y < (screenHeight * 0.54))
-                            {
-                                //CREDITS
-                            }
-                        }
+                        thrust = Keyboard.GetState().GetPressedKeys()[0];
+                        KeyConfig[0] = thrust;
+                        myMenu.updateThrust(this.thrust);
                     }
-                    break;
-                case screen.WIN1:
-                case screen.WIN2:
-                    System.Threading.Thread.Sleep(3000);
-                    if (curScreen == screen.WIN1)
+                    else if(rotLeft == Keys.None)
                     {
-                        prepNewTerrain(screen.LEVEL2);
-                        createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8)))); //TODO: Random doubles in range for start points
+                        rotLeft = Keyboard.GetState().GetPressedKeys()[0];
+                        KeyConfig[1] = rotLeft;
+                        myMenu.updateRotLeft(this.rotLeft);
                     }
-                    break;
-                case screen.LEVEL1:
-                case screen.LEVEL2:
-                    if (Keyboard.GetState().IsKeyDown(Keys.F1))
+                    else if(rotRight == Keys.None)
                     {
-                        if (!keyPressed)
-                        {
-                            prepNewTerrain();
+                        rotRight = Keyboard.GetState().GetPressedKeys()[0];
+                        KeyConfig[2] = rotRight;
+                        myMenu.updateRotRight(this.rotRight);
+                    }
+                    changingKey = false;
+                }
+            }
+            else
+            {
+
+
+                if (act != action.NULL)
+                {
+                    switch (act)
+                    {
+                        case action.PLAY:
+                            prepNewTerrain(screen.LEVEL1);
                             createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8))));
-                            keyPressed = true;
-                        }
-                    }
-                    if (Keyboard.GetState().IsKeyDown(rotLeft))
-                    {
-                        lander.angle -= 0.04f;
-                    }
-                    if (Keyboard.GetState().IsKeyDown(rotRight))
-                    {
-                        lander.angle += 0.04f;
-                    }
-                    if (Keyboard.GetState().IsKeyDown(thrust))
-                    {
+                            break;
+                        case action.HIGH_SCORES:
+                            curScreen = screen.HIGH_SCORES;
+                            break;
+                        case action.CONTROLS:
+                            curScreen = screen.CONTROLS;
+                            break;
+                        case action.CREDITS:
+                            curScreen = screen.CREDITS;
+                            break;
+                        case action.BACK:
+                            curScreen = myMenu.destinationScreen;
+                            break;
+                        case action.QUIT://Generic quit vs. Terminate?
+                            Quit();
+                            break;
+                        case action.CONTINUE://Quit menu
+                            break;
+                        case action.CHANGE_UP:
+                            thrust = Keys.None;
+                            myMenu.updateThrust(Keys.None);
+                            changingKey = true;
+                            break;
+                        case action.CHANGE_LEFT:
+                            rotLeft = Keys.None;
+                            myMenu.updateRotLeft(Keys.None);
+                            changingKey = true;
+                            break;
+                        case action.CHANGE_RIGHT:
+                            rotRight = Keys.None;
+                            myMenu.updateRotRight(Keys.None);
+                            changingKey = true;
+                            break;
 
-                        if (lander.fuel > 0)
+                    }
+                }
+                switch (curScreen)
+                {
+                    case screen.WIN1:
+                        System.Threading.Thread.Sleep(3000);
+                        if (curScreen == screen.WIN1)
                         {
-                            emitParticles = true;
-                            Vector2 direction = new Vector2((float)Math.Cos(lander.angle - Math.PI / 2), (float)Math.Sin(lander.angle - Math.PI / 2));
-                            horizontalMomentum += direction.X * 0.04f;
-                            gravitationalForce += direction.Y * 0.04f;
-                            lander.fuel -= 0.1f;
+                            prepNewTerrain(screen.LEVEL2);
+
+                            createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8)))); //TODO: Random doubles in range for start points
+                        }
+                        break;
+                    case screen.LEVEL1:
+                    case screen.LEVEL2:
+                        if (Keyboard.GetState().IsKeyDown(Keys.F1))
+                        {
+                            if (!keyPressed)
+                            {
+                                prepNewTerrain();
+                                createPolygon(new Point(0, (int)(screenHeight * (0.8))), new Point(screenWidth, (int)(screenHeight * (0.8))));
+                                keyPressed = true;
+                            }
+                        }
+                        if (Keyboard.GetState().IsKeyDown(rotLeft))
+                        {
+                            lander.angle -= 0.04f;
+                        }
+                        if (Keyboard.GetState().IsKeyDown(rotRight))
+                        {
+                            lander.angle += 0.04f;
+                        }
+                        if (Keyboard.GetState().IsKeyDown(thrust))
+                        {
+
+                            if (lander.fuel > 0)
+                            {
+                                emitParticles = true;
+                                Vector2 direction = new Vector2((float)Math.Cos(lander.angle - Math.PI / 2), (float)Math.Sin(lander.angle - Math.PI / 2));
+                                horizontalMomentum += direction.X * 0.04f;
+                                gravitationalForce += direction.Y * 0.04f;
+                                lander.fuel -= 0.1f;
+                            }
+                            else
+                                emitParticles = false;
                         }
                         else
+                        {
                             emitParticles = false;
-                    }
-                    else
-                    {
-                        emitParticles = false;
-                    }
+                        }
 
-                    if (crashed)
-                    {
-                        //particleEmitterFire.shipCrash(lander.position);
-                        //particleEmitterSmoke.shipCrash(lander.position);
-                        particleEmitterFire.shipThrust(gameTime, lander.position, true, 0);
-                        particleEmitterSmoke.shipThrust(gameTime, lander.position, true, 0);
-                    }
-                    else
-                    {
-                        float landerRadius = (screenWidth * 0.03958f) / 2;
-                        particleEmitterSmoke.shipThrust(gameTime, lander.position + new Vector2(((float)Math.Cos(lander.angle + Math.PI / 2) * landerRadius), ((float)Math.Sin(lander.angle + Math.PI / 2) * landerRadius)), emitParticles, lander.angle, 0.3);
-                        particleEmitterFire.shipThrust(gameTime, lander.position + new Vector2(((float)Math.Cos(lander.angle + Math.PI / 2) * landerRadius), ((float)Math.Sin(lander.angle + Math.PI / 2) * landerRadius)), emitParticles, lander.angle, 0.2);
-                    }
-
-                    if (detectCollision() && !stop)
-                    {
-                        //detect win/loss condition
-                        if (isWin())
+                        if (crashed)
                         {
-                            //1. Wait while sound plays
-                            //2. play sound
-                            //3. Switch to WIN1 screen
-                            MediaPlayer.Stop();
-                            soundEffects[1].CreateInstance().Play();
-                            stop = true;
-                            System.Threading.Thread.Sleep(1000);
-                            if (curScreen == screen.LEVEL1)
-                                curScreen = screen.WIN1;
+                            transitionTime += (int)millisecondsElapsed;
+                            if (transitionTime < 500)
+                            {
+                                particleEmitterFire.shipCrash(lander.position);
+                                //particleEmitterSmoke.shipCrash(lander.position);
+                                particleEmitterFire.shipThrust(gameTime, lander.position, true, -1);
+                                particleEmitterSmoke.shipThrust(gameTime, lander.position, false, -1);
+                            }
+                            else if (transitionTime < 2000)
+                            {
+                                particleEmitterFire.shipThrust(gameTime, lander.position, false, -1);
+                                particleEmitterSmoke.shipThrust(gameTime, lander.position, false, -1);
+                            }
                             else
-                                curScreen = screen.WIN2;
-                            stop = false;
-                            themePlaying = false;
-                            winner = true;
+                            {
+                                crashed = false;
+                                curScreen = screen.LOSE;
+
+                            }
                         }
                         else
                         {
-                            //1. Wait while ship explodes
-                            //2. play sound
-                            //3. Switch to lose screen
-                            MediaPlayer.Stop();
-                            soundEffects[0].CreateInstance().Play();
-                            stop = true;
-                            crashed = true;
-                            lander.fuel = 0;
-                            lander.angle = 0;
-                            gravitationalForce = 0;
-                            //System.Threading.Thread.Sleep(1000);
-                            //curScreen = screen.LOSE;
-                            //stop = false;
-                            themePlaying = false;
+                            float landerRadius = (screenWidth * 0.03958f) / 2;
+                            particleEmitterSmoke.shipThrust(gameTime, lander.position + new Vector2(((float)Math.Cos(lander.angle + Math.PI / 2) * landerRadius), ((float)Math.Sin(lander.angle + Math.PI / 2) * landerRadius)), emitParticles, lander.angle, 0.3);
+                            particleEmitterFire.shipThrust(gameTime, lander.position + new Vector2(((float)Math.Cos(lander.angle + Math.PI / 2) * landerRadius), ((float)Math.Sin(lander.angle + Math.PI / 2) * landerRadius)), emitParticles, lander.angle, 0.2);
                         }
-                    }
 
-
-                    if (!stop)
-                    {
-                        //Move Lander
-                        //Lander position.X += horizontalmomentum
-                        //Lander Position.Y += gravitationalForce
-                        //Given direction of lander, increment/decrement gravity and momentum given thrust_YN
-                        Vector2 movement = new Vector2(horizontalMomentum, gravitationalForce);
-                        lander.position += movement * (int)millisecondsElapsed * 0.2f;
-                        gravitationalForce += 0.01f;
-                        if (horizontalMomentum != 0)
+                        if (detectCollision() && !stop)
                         {
-                            if (horizontalMomentum > 0)
-                                horizontalMomentum -= 0.01f;
+                            //detect win/loss condition
+                            if (isWin())
+                            {
+                                //1. Wait while sound plays
+                                //2. play sound
+                                //3. Switch to WIN1 screen
+                                MediaPlayer.Stop();
+                                soundEffects[1].CreateInstance().Play();
+                                stop = true;
+                                if (curScreen == screen.LEVEL1)
+                                {
+                                    curScreen = screen.WIN1;
+                                }
+                                else
+                                {
+                                    curScreen = screen.WIN2;
+                                }
+                                myMenu.Update(curScreen);
+                                System.Threading.Thread.Sleep(1000);
+
+
+                                themePlaying = false;
+                                generateScore();
+                            }
                             else
-                                horizontalMomentum += 0.01f;
+                            {
+                                //1. Wait while ship explodes
+                                //2. play sound
+                                //3. Switch to lose screen
+                                MediaPlayer.Stop();
+                                soundEffects[0].CreateInstance().Play();
+                                stop = true;
+                                crashed = true;
+                                lander.fuel = 0;
+                                lander.angle = 0;
+                                gravitationalForce = 0;
+                                themePlaying = false;
+                                currentScore = 0;
+                            }
                         }
-                    }
-                    
-                    break;
+
+
+                        if (!stop)
+                        {
+                            //Move Lander
+                            //Lander position.X += horizontalmomentum
+                            //Lander Position.Y += gravitationalForce
+                            //Given direction of lander, increment/decrement gravity and momentum given thrust_YN
+                            Vector2 movement = new Vector2(horizontalMomentum, gravitationalForce);
+                            lander.position += movement * (int)millisecondsElapsed * 0.2f;
+                            gravitationalForce += 0.01f;
+                            if (horizontalMomentum != 0)
+                            {
+                                if (horizontalMomentum > 0)
+                                    horizontalMomentum -= 0.01f;
+                                else
+                                    horizontalMomentum += 0.01f;
+                            }
+                        }
+
+                        break;
+                }
             }
             if (Keyboard.GetState().GetPressedKeyCount() == 0)
                 keyPressed = false;
+            
             lastIteration = now;
             base.Update(gameTime);
         }
@@ -616,18 +763,11 @@ namespace Lunar_Lander
             }
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin();
-
-
-            _spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, screenWidth, screenHeight), Color.White);
-
             
+            myMenu.Draw(_spriteBatch);
+            _spriteBatch.Begin();
             switch (curScreen) 
             {
-                case screen.MAIN:
-                    _spriteBatch.Draw(menuTexture, new Rectangle(screenWidth / 4, (int)(screenHeight * 0.21), screenWidth / 2, (int)(screenHeight * 0.42)), Color.White);
-                    _spriteBatch.End();
-                    break;
                 case screen.LEVEL1:
                 case screen.LEVEL2:
                     if(!crashed)
@@ -671,16 +811,7 @@ namespace Lunar_Lander
                             indexTri, 0, indexTri.Length / 3);
                     }
                     break;
-                case screen.WIN1:
-                    _spriteBatch.Draw(Win1Texture, new Rectangle(screenWidth / 4, (int)(screenHeight * 0.21), screenWidth / 2, (int)(screenHeight * 0.42)), Color.White);
-                    _spriteBatch.End();
-                    break;
-                case screen.WIN2:
-                    _spriteBatch.Draw(Win2Texture, new Rectangle(screenWidth / 4, (int)(screenHeight * 0.21), screenWidth / 2, (int)(screenHeight * 0.42)), Color.White);
-                    _spriteBatch.End();
-                    break;
-                case screen.LOSE:
-                    _spriteBatch.Draw(LoseTexture, new Rectangle(screenWidth / 4, (int)(screenHeight * 0.21), screenWidth / 2, (int)(screenHeight * 0.42)), Color.White);
+                default:
                     _spriteBatch.End();
                     break;
             }
